@@ -231,7 +231,7 @@ body {
 .queue-source-label {
     text-align: center;
     font-size: $font-xl;
-    color: $primary-dark;
+    // color: $primary-dark;
     margin-bottom: $spacing-lg;
     font-weight: 700;
 }
@@ -266,7 +266,7 @@ body {
 
     .label {
         font-weight: 700;
-        color: $primary-dark;
+        // color: $primary-dark;
     }
 
     .value {
@@ -274,7 +274,7 @@ body {
         text-align: right;
         flex: 1;
         margin-left: $spacing-lg;
-        color: $text-darker-blue;
+        // color: $text-darker-blue;
     }
 }
 

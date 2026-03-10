@@ -68,7 +68,7 @@ class KioskApp {
             this.showScreen('result');
 
             // Schedule auto-return
-            this.scheduleAutoReturn(15); // 15 seconds
+            this.scheduleAutoReturn(50); // 15 seconds
 
         } catch (error) {
             console.error('[App] Error:', error.message);
