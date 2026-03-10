@@ -7,6 +7,7 @@ class KioskApp {
         this.apiClient = new QueueAPIClient();
         this.scanner = null;
         this.autoReturnTimeout = null;
+        this.countdownInterval = null;
 
         // Screens
         this.screens = {
@@ -68,7 +69,7 @@ class KioskApp {
             this.showScreen('result');
 
             // Schedule auto-return
-            this.scheduleAutoReturn(50); // 15 seconds
+            this.scheduleAutoReturn(15); // 15 seconds
 
         } catch (error) {
             console.error('[App] Error:', error.message);
@@ -156,16 +157,22 @@ class KioskApp {
             clearTimeout(this.autoReturnTimeout);
         }
 
+        // Clear any existing countdown interval
+        if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
+        }
+
         this.updateCountdown(seconds);
 
         // Update every second
         let remaining = seconds;
-        const countdownInterval = setInterval(() => {
+        this.countdownInterval = setInterval(() => {
             remaining--;
             this.updateCountdown(remaining);
 
             if (remaining <= 0) {
-                clearInterval(countdownInterval);
+                clearInterval(this.countdownInterval);
+                this.countdownInterval = null;
                 this.returnToIdle();
             }
         }, 1000);
@@ -175,9 +182,14 @@ class KioskApp {
      * Update countdown display
      */
     updateCountdown(seconds) {
-        const element = document.getElementById('returnCountdown');
-        if (element) {
-            element.textContent = seconds;
+        const resultElement = document.getElementById('returnCountdown');
+        const errorElement = document.getElementById('errorCountdown');
+
+        if (resultElement) {
+            resultElement.textContent = seconds;
+        }
+        if (errorElement) {
+            errorElement.textContent = seconds;
         }
     }
 
@@ -190,6 +202,13 @@ class KioskApp {
         // Cancel any pending auto-return
         if (this.autoReturnTimeout) {
             clearTimeout(this.autoReturnTimeout);
+            this.autoReturnTimeout = null;
+        }
+
+        // Clear countdown interval
+        if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
+            this.countdownInterval = null;
         }
 
         this.showScreen('idle');
