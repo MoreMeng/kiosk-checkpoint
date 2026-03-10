@@ -257,6 +257,7 @@ start_services() {
         return 1
     fi
     log_info "chromium-kiosk service started"
+}
 
 show_status() {
     echo ""
