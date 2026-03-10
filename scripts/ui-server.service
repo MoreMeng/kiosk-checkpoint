@@ -1,0 +1,13 @@
+[Unit]
+Description=Static UI server for Kiosk Checkpoint
+After=network.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/kiosk-checkpoint/public
+ExecStart=/usr/bin/python3 -m http.server 8080
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

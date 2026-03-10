@@ -1,0 +1,14 @@
+[Unit]
+Description=Serial to WebSocket Bridge for Kiosk
+After=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/kiosk-checkpoint
+ExecStart=/usr/bin/python3 /home/pi/kiosk-checkpoint/scripts/serial_ws_bridge.py --device /dev/ttyUSB0 --baud 9600 --port 8765
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

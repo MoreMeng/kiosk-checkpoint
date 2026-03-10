@@ -1,0 +1,19 @@
+:root{--bg:#0b2545;--card:#ffffff;--accent:#0078d4;--text:#ffffff}
+*{box-sizing:border-box}
+html,body,#app{height:100%;margin:0;font-family:Segoe UI, Roboto, Arial, sans-serif}
+body{background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center}
+.screen{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+.hidden{display:none}
+h1{font-size:48px;margin:0 0 12px}
+.hint{font-size:24px;opacity:0.9}
+.card{background:var(--card);color:#111;border-radius:12px;padding:28px;min-width:420px;max-width:900px;display:flex;gap:20px;align-items:center}
+.qno{font-size:96px;font-weight:700;color:var(--accent)}
+.qinfo{text-align:left}
+.qinfo div{font-size:28px;margin:6px 0}
+.hidden-input{position:fixed;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
+
+@media (max-width:600px){
+  h1{font-size:28px}
+  .qno{font-size:56px}
+  .qinfo div{font-size:18px}
+}

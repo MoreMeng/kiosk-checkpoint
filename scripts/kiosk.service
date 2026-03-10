@@ -1,0 +1,16 @@
+[Unit]
+Description=Kiosk Checkpoint Service
+After=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/kiosk-checkpoint
+Environment=PORT=8080
+Environment=BACKEND_BASE=http://backend-host:port
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
