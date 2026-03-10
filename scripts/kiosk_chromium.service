@@ -4,7 +4,7 @@ After=graphical.target network-online.target
 Wants=graphical.target
 
 [Service]
-User=pi
+User=moremeng
 Environment=DISPLAY=:0
 Type=simple
 ExecStart=/usr/bin/chromium-browser --noerrdialogs --kiosk --incognito --disable-translate --disable-infobars http://localhost:8080

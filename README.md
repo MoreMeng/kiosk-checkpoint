@@ -4,11 +4,11 @@ This scaffold provides a minimal kiosk web app to run on a Raspberry Pi. It list
 
 Quick start (on Raspberry Pi):
 
-1. Clone or copy this repo to `/home/pi/kiosk-checkpoint`.
+1. Clone or copy this repo to `/home/moremeng/kiosk-checkpoint`.
 2. Install dependencies:
 
 ```bash
-cd /home/pi/kiosk-checkpoint
+cd /home/moremeng/kiosk-checkpoint
 npm install
 ```
 
@@ -38,10 +38,10 @@ Notes about backend API (important):
 
 - **Steps (copy these commands and run on the Pi)**
 
-- **1) Place the project on the Pi**: Clone or copy to `/home/pi/kiosk-checkpoint`.
+-- **1) Place the project on the Pi**: Clone or copy to `/home/moremeng/kiosk-checkpoint`.
 
 ```bash
-cd /home/pi
+cd /home/moremeng
 git clone <repo-url> kiosk-checkpoint
 cd kiosk-checkpoint
 ```
@@ -49,7 +49,7 @@ cd kiosk-checkpoint
 - **2) (Optional) Install Node deps for mock testing**:
 
 ```bash
-cd /home/pi/kiosk-checkpoint
+cd /home/moremeng/kiosk-checkpoint
 npm install
 # Start mock server for local testing (optional)
 # npm start
@@ -85,16 +85,16 @@ sudo raspi-config
 
 - **6) Disable screen blanking**
 
-Create or append autostart settings for the `pi` user:
+Create or append autostart settings for the `moremeng` user:
 
 ```bash
-mkdir -p /home/pi/.config/lxsession/LXDE-pi
-cat >> /home/pi/.config/lxsession/LXDE-pi/autostart <<'EOF'
+mkdir -p /home/moremeng/.config/lxsession/LXDE-pi
+cat >> /home/moremeng/.config/lxsession/LXDE-pi/autostart <<'EOF'
 @xset s off
 @xset -dpms
 @xset s noblank
 EOF
-chown -R pi:pi /home/pi/.config
+chown -R moremeng:moremeng /home/moremeng/.config
 ```
 
 - **7) Verify backend connectivity and test**

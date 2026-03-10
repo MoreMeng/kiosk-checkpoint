@@ -4,9 +4,9 @@ After=network-online.target
 
 [Service]
 Type=simple
-User=pi
-WorkingDirectory=/home/pi/kiosk-checkpoint
-ExecStart=/usr/bin/python3 /home/pi/kiosk-checkpoint/scripts/serial_ws_bridge.py --device /dev/ttyUSB0 --baud 9600 --port 8765
+User=moremeng
+WorkingDirectory=/home/moremeng/kiosk-checkpoint
+ExecStart=/usr/bin/python3 /home/moremeng/kiosk-checkpoint/scripts/serial_ws_bridge.py --device /dev/ttyUSB0 --baud 9600 --port 8765
 Restart=always
 RestartSec=5
 
