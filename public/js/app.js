@@ -97,22 +97,19 @@ class KioskApp {
         console.log('[App] Displaying queue data:', data);
 
         const mapping = {
+            source: data.source || '-',
             qid: data.qid || data.qno || '-',
-            qno: data.qno || '-',
-            status: data.ost_name || '-',
-            task: data.qstn || '-',
-            location: data.location || '-',
-            dept: data.department_code || '-',
-            date: this.formatDate(data.qdate)
+            status: data.qstn || '-',
+            cdate: data.cdate || '-',
+            location: data.location || '-'
         };
 
         // Update DOM
-        document.getElementById('queueNo').textContent = mapping.qno;
+        document.getElementById('queueSource').textContent = mapping.source;
+        document.getElementById('queueQid').textContent = mapping.qid;
         document.getElementById('queueStatus').textContent = mapping.status;
-        document.getElementById('queueTask').textContent = mapping.task;
+        document.getElementById('queueCdate').textContent = mapping.cdate;
         document.getElementById('queueLocation').textContent = mapping.location;
-        document.getElementById('queueDept').textContent = mapping.dept;
-        document.getElementById('queueDate').textContent = mapping.date;
 
         console.log('[App] Queue display updated');
     }

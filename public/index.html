@@ -4,17 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kiosk - ตรวจสอบคิว</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <!-- Google Fonts: Noto Sans Thai -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.min.css">
 </head>
 <body>
     <!-- Idle Screen (รอการสแกน) -->
     <div id="idleScreen" class="screen active">
         <div class="container">
             <h1>ตรวจสอบสถานะคิว</h1>
-            <div class="idle-icon">📱</div>
-            <h2>กรุณาสแกนใบการตรวจ</h2>
-            <p class="instruction">สแกนบาร์โค้ดหรือ QR code บนใบการตรวจของคุณ</p>
-            <div id="scannerStatus" class="status-badge" style="margin-top: 30px;">สแกนเนอร์: พร้อม</div>
+            <div class="idle-icon material-icons">document_scanner</div>
+            <h2>ใช้สำหรับใบนำทางและคิวยา</h2>
+            <p class="instruction">สแกนบาร์โค้ดบนใบนำทาง หรือคิวยาของท่าน</p>
+            <div id="scannerStatus" class="status-badge" style="margin-top: 30px;">
+                <span class="material-icons icon-small">check_circle</span> สแกนเนอร์: พร้อม
+            </div>
         </div>
     </div>
 
@@ -22,7 +28,7 @@
     <div id="loadingScreen" class="screen">
         <div class="container">
             <div class="spinner"></div>
-            <h2>กำลังดึงข้อมูล...</h2>
+            <h2>กำลังโหลดข้อมูล...</h2>
             <p id="loadingMessage">รอสักครู่</p>
         </div>
     </div>
@@ -30,10 +36,12 @@
     <!-- Error Screen -->
     <div id="errorScreen" class="screen">
         <div class="container">
-            <div class="error-icon">⚠️</div>
+            <div class="error-icon material-icons">error_outline</div>
             <h2>ไม่พบข้อมูล</h2>
             <p id="errorMessage"></p>
-            <button class="btn-retry" onclick="app.returnToIdle()">กลับ</button>
+            <button class="btn-retry" onclick="app.returnToIdle()">
+                <span class="material-icons icon-small">reply</span> กลับ
+            </button>
         </div>
     </div>
 
@@ -43,31 +51,29 @@
             <h1>สถานะคิวของคุณ</h1>
 
             <div class="queue-card">
-                <div class="queue-number">
-                    <span class="label">หมายเลขคิว</span>
-                    <div id="queueNo" class="big-number">-</div>
+                <!-- ประเภทคิว (แค่ค่า) -->
+                <div class="queue-source-label">
+                    <span id="queueSource">-</span>
                 </div>
 
+                <!-- หมายเลขคิว (ใหญ่ตรงกลาง) -->
+                <div class="queue-number-display">
+                    <div id="queueQid" class="big-number">-</div>
+                </div>
+
+                <!-- ข้อมูลอื่นๆ -->
                 <div class="queue-info">
                     <div class="info-row">
-                        <span class="label">สถานะ</span>
+                        <span class="label">สถานะปัจจุบัน</span>
                         <span id="queueStatus" class="value">-</span>
                     </div>
                     <div class="info-row">
-                        <span class="label">สิ่งที่ต้องทำ</span>
-                        <span id="queueTask" class="value">-</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="label">อยู่ที่</span>
+                        <span class="label">แผนกปัจจุบัน</span>
                         <span id="queueLocation" class="value">-</span>
                     </div>
                     <div class="info-row">
-                        <span class="label">แผนก</span>
-                        <span id="queueDept" class="value">-</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="label">วันที่</span>
-                        <span id="queueDate" class="value">-</span>
+                        <span class="label">เวลาที่ส่งตรวจ</span>
+                        <span id="queueCdate" class="value">-</span>
                     </div>
                 </div>
             </div>
@@ -78,7 +84,7 @@
 
     <!-- Offline Indicator -->
     <div id="offlineIndicator" class="offline-indicator hidden">
-        🔌 ออฟไลน์ - ระบบจะ retry อัตโนมัติ
+        <span class="material-icons icon-small">cloud_off</span> ออฟไลน์ - ระบบจะ retry อัตโนมัติ
     </div>
 
     <script src="js/scanner.js"></script>
