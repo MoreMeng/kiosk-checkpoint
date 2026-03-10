@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiosk - ตรวจสอบคิว</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Idle Screen (รอการสแกน) -->
+    <div id="idleScreen" class="screen active">
+        <div class="container">
+            <h1>ตรวจสอบสถานะคิว</h1>
+            <div class="idle-icon">📱</div>
+            <h2>กรุณาสแกนใบการตรวจ</h2>
+            <p class="instruction">สแกนบาร์โค้ดหรือ QR code บนใบการตรวจของคุณ</p>
+            <div id="scannerStatus" class="status-badge" style="margin-top: 30px;">สแกนเนอร์: พร้อม</div>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="screen">
+        <div class="container">
+            <div class="spinner"></div>
+            <h2>กำลังดึงข้อมูล...</h2>
+            <p id="loadingMessage">รอสักครู่</p>
+        </div>
+    </div>
+
+    <!-- Error Screen -->
+    <div id="errorScreen" class="screen">
+        <div class="container">
+            <div class="error-icon">⚠️</div>
+            <h2>ไม่พบข้อมูล</h2>
+            <p id="errorMessage"></p>
+            <button class="btn-retry" onclick="app.returnToIdle()">กลับ</button>
+        </div>
+    </div>
+
+    <!-- Result Screen (แสดงสถานะ) -->
+    <div id="resultScreen" class="screen">
+        <div class="container result-container">
+            <h1>สถานะคิวของคุณ</h1>
+
+            <div class="queue-card">
+                <div class="queue-number">
+                    <span class="label">หมายเลขคิว</span>
+                    <div id="queueNo" class="big-number">-</div>
+                </div>
+
+                <div class="queue-info">
+                    <div class="info-row">
+                        <span class="label">สถานะ</span>
+                        <span id="queueStatus" class="value">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">สิ่งที่ต้องทำ</span>
+                        <span id="queueTask" class="value">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">อยู่ที่</span>
+                        <span id="queueLocation" class="value">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">แผนก</span>
+                        <span id="queueDept" class="value">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">วันที่</span>
+                        <span id="queueDate" class="value">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <p class="auto-return-msg">จะกลับไปหน้าเริ่มต้นใน <span id="returnCountdown">15</span> วินาที</p>
+        </div>
+    </div>
+
+    <!-- Offline Indicator -->
+    <div id="offlineIndicator" class="offline-indicator hidden">
+        🔌 ออฟไลน์ - ระบบจะ retry อัตโนมัติ
+    </div>
+
+    <script src="js/scanner.js"></script>
+    <script src="js/api-client.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

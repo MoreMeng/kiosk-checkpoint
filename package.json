@@ -1,0 +1,28 @@
+{
+  "name": "kiosk-checkpoint",
+  "version": "1.0.0",
+  "description": "Queue Status Kiosk for Hospital/Clinic using Raspberry Pi and Barcode Reader",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js",
+    "test": "node tests/test.js"
+  },
+  "keywords": [
+    "kiosk",
+    "queue",
+    "hospital",
+    "barcode",
+    "raspberry-pi"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/kiosk-checkpoint.git"
+  },
+  "dependencies": {}
+}

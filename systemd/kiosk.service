@@ -1,0 +1,30 @@
+[Unit]
+Description=Kiosk Checkpoint - Queue Status Display
+Documentation=https://github.com/yourusername/kiosk-checkpoint
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/opt/kiosk-checkpoint
+ExecStart=/usr/bin/node /opt/kiosk-checkpoint/server/index.js
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=kiosk
+
+# Security/Resource limits
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/kiosk-checkpoint/logs
+
+# Resource limits (Raspberry Pi optimization)
+MemoryLimit=256M
+CPUQuota=80%
+
+[Install]
+WantedBy=multi-user.target

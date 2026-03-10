@@ -1,0 +1,142 @@
+/**
+ * Simple HTTP Server - ให้ใช้ serve static files
+ * ใช้ Node.js built-in http module ไม่ต้อง dependencies เพิ่มเติม
+ */
+
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const url = require('url');
+
+const PORT = 8080;
+const PUBLIC_DIR = path.join(__dirname, '../public');
+
+// MIME type mapping
+const mimeTypes = {
+    '.html': 'text/html;charset=utf-8',
+    '.js': 'text/javascript',
+    '.css': 'text/css',
+    '.json': 'application/json',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.gif': 'image/gif',
+    '.svg': 'image/svg+xml',
+    '.ico': 'image/x-icon'
+};
+
+const server = http.createServer((req, res) => {
+    // Parse URL
+    const parsedUrl = url.parse(req.url, true);
+    let pathname = parsedUrl.pathname;
+
+    // Default to index.html for root
+    if (pathname === '/' || pathname === '') {
+        pathname = '/index.html';
+    }
+
+    // Prevent directory traversal attacks
+    if (pathname.includes('..')) {
+        res.writeHead(400, { 'Content-Type': 'text/plain' });
+        res.end('Bad request');
+        return;
+    }
+
+    const filePath = path.join(PUBLIC_DIR, pathname);
+
+    // Check if file exists
+    fs.stat(filePath, (err, stats) => {
+        if (err) {
+            // File not found
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end('404 - File not found\n');
+            console.log(`[404] ${pathname}`);
+            return;
+        }
+
+        if (stats.isDirectory()) {
+            // Try to serve index.html from directory
+            const indexPath = path.join(filePath, 'index.html');
+            fs.stat(indexPath, (err) => {
+                if (err) {
+                    res.writeHead(403, { 'Content-Type': 'text/plain' });
+                    res.end('403 - Forbidden\n');
+                    return;
+                }
+
+                serveFile(indexPath, res);
+            });
+            return;
+        }
+
+        serveFile(filePath, res);
+    });
+});
+
+function serveFile(filePath, res) {
+    const ext = path.extname(filePath).toLowerCase();
+    const mimeType = mimeTypes[ext] || 'application/octet-stream';
+
+    fs.readFile(filePath, (err, content) => {
+        if (err) {
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.end('500 - Internal Server Error\n');
+            console.error(`[500] Error reading ${filePath}:`, err.message);
+            return;
+        }
+
+        // Add cache headers
+        const cacheControl = ext === '.html'
+            ? 'no-cache, no-store, must-revalidate'
+            : 'public, max-age=3600';
+
+        res.writeHead(200, {
+            'Content-Type': mimeType,
+            'Cache-Control': cacheControl,
+            'Access-Control-Allow-Origin': '*',
+            'X-Content-Type-Options': 'nosniff'
+        });
+
+        res.end(content);
+        console.log(`[200] ${filePath}`);
+    });
+}
+
+// Health check endpoint
+server.on('request', (req, res) => {
+    if (req.url === '/health') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() }));
+        console.log('[Health] OK');
+        return;
+    }
+});
+
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`
+╔════════════════════════════════════════╗
+║   Kiosk Checkpoint Server Started      ║
+╠════════════════════════════════════════╣
+║ Server: http://localhost:${PORT}      ║
+║ Public: ${PUBLIC_DIR}    ║
+║ Health: http://localhost:${PORT}/health║
+╚════════════════════════════════════════╝
+    `);
+    console.log('Press Ctrl+C to stop server\n');
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('[Server] SIGTERM received - shutting down gracefully');
+    server.close(() => {
+        console.log('[Server] Server closed');
+        process.exit(0);
+    });
+});
+
+process.on('SIGINT', () => {
+    console.log('[Server] SIGINT received - shutting down gracefully');
+    server.close(() => {
+        console.log('[Server] Server closed');
+        process.exit(0);
+    });
+});
