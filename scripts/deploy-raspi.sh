@@ -211,6 +211,7 @@ test_api_connection() {
         log_warn "Could not reach API at http://$API_HOST:$API_PORT"
         echo "Note: API server may not be running yet, or network issue"
         echo "You can test later with: curl http://$API_HOST:$API_PORT/rxqueue/HN1234"
+    fi
 }
 
 configure_display() {
