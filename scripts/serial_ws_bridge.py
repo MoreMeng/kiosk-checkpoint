@@ -84,21 +84,27 @@ def main():
     p.add_argument('--port', type=int, default=8765)
     args = p.parse_args()
 
-    loop = asyncio.get_event_loop()
-    start_server = websockets.serve(handler, '0.0.0.0', args.port)
-    server = loop.run_until_complete(start_server)
-    logging.info('WebSocket server listening on ws://0.0.0.0:%d', args.port)
+    async def main_async():
+        server = await websockets.serve(handler, '0.0.0.0', args.port)
+        logging.info('WebSocket server listening on ws://0.0.0.0:%d', args.port)
 
-    t = threading.Thread(target=serial_loop, args=(args.device, args.baud, loop), daemon=True)
-    t.start()
+        loop = asyncio.get_running_loop()
+        t = threading.Thread(target=serial_loop, args=(args.device, args.baud, loop), daemon=True)
+        t.start()
+
+        try:
+            # run until cancelled (serve forever)
+            await asyncio.Future()
+        except asyncio.CancelledError:
+            logging.info('Shutting down')
+        finally:
+            server.close()
+            await server.wait_closed()
 
     try:
-        loop.run_forever()
+        asyncio.run(main_async())
     except KeyboardInterrupt:
-        logging.info('Shutting down')
-    finally:
-        server.close()
-        loop.run_until_complete(server.wait_closed())
+        logging.info('Keyboard interrupt, exiting')
 
 if __name__ == '__main__':
     main()
