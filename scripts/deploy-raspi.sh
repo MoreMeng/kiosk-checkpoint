@@ -89,15 +89,33 @@ install_dependencies() {
         exit 1
     fi
 
-    log_info "Installing packages: nodejs, npm, chromium-browser, git, curl..."
+    log_info "Installing packages: nodejs, npm, git, curl..."
     if ! apt-get install -y \
         nodejs npm \
-        chromium-browser \
         git \
         curl; then
-        log_error "Failed to install dependencies"
+        log_error "Failed to install core dependencies"
         echo "Try: sudo apt-get update && sudo apt-get upgrade"
         exit 1
+    fi
+
+    # Try to install chromium (different packages on different systems)
+    log_info "Installing chromium browser..."
+    if apt-cache search ^chromium$ | grep -q chromium; then
+        log_info "Found 'chromium' package"
+        apt-get install -y chromium
+    elif apt-cache search ^chromium-browser$ | grep -q chromium-browser; then
+        log_info "Found 'chromium-browser' package"
+        apt-get install -y chromium-browser
+    else
+        log_warn "chromium package not found, trying snap..."
+        if command -v snap &> /dev/null; then
+            snap install chromium
+        else
+            log_warn "Could not find chromium in apt or snap"
+            log_warn "You may need to install manually: snap install chromium"
+            # Continue anyway
+        fi
     fi
 
     log_info "Dependencies installed successfully"
