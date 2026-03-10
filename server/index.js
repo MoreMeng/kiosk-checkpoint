@@ -29,6 +29,35 @@ const server = http.createServer((req, res) => {
     const parsedUrl = url.parse(req.url, true);
     let pathname = parsedUrl.pathname;
 
+    // ✅ API Proxy - forward to backend (/rxqueue/:patientId)
+    if (pathname.startsWith('/api/rxqueue/')) {
+        const patientId = pathname.replace('/api/rxqueue/', '');
+        const apiUrl = `http://192.168.88.8:6601/rxqueue/${patientId}`;
+
+        console.log(`[PROXY] Forwarding to: ${apiUrl}`);
+
+        http.get(apiUrl, (apiRes) => {
+            let data = '';
+
+            apiRes.on('data', chunk => {
+                data += chunk;
+            });
+
+            apiRes.on('end', () => {
+                res.writeHead(apiRes.statusCode, {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                });
+                res.end(data);
+            });
+        }).on('error', (err) => {
+            console.error(`[PROXY ERROR] ${apiUrl}:`, err.message);
+            res.writeHead(503, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'API unavailable' }));
+        });
+        return;
+    }
+
     // Default to index.html for root
     if (pathname === '/' || pathname === '') {
         pathname = '/index.html';

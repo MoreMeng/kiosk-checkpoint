@@ -28,7 +28,8 @@ class QueueAPIClient {
             throw new Error('Patient ID is required');
         }
 
-        const url = `${this.apiBaseUrl}${this.apiEndpoint}/${patientId}`;
+        // ✅ ใช้ proxy server เพื่อ bypass CORS (แทน direct API call)
+        const url = `/api/rxqueue/${patientId}`;
         console.log('[API] Fetching:', url);
 
         let lastError = null;
@@ -38,8 +39,7 @@ class QueueAPIClient {
                 const response = await fetch(url, {
                     method: 'GET',
                     headers: {
-                        'Accept': 'application/json',
-                        'Cache-Control': 'no-cache'
+                        'Accept': 'application/json'
                     },
                     timeout: 5000
                 });
