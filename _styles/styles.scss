@@ -412,3 +412,33 @@ body {
     color: $accent-yellow;
     margin-bottom: $spacing-lg;
 }
+
+/* Footer */
+.app-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(90deg, $primary-dark 0%, $primary-bright 100%);
+    color: white;
+    padding: $spacing-sm $spacing-lg;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    z-index: 999;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.app-footer .version {
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 12px;
+    border-radius: 12px;
+    letter-spacing: 0.5px;
+}
+
+.app-footer .developer {
+    opacity: 0.9;
+    font-size: 0.8rem;
+}
