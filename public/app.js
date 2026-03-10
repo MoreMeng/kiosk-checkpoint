@@ -71,9 +71,67 @@
       showResult(data[0]);
     } catch (err) {
       console.error('fetch error', err);
-      showError('ไม่สามารถติดต่อเซิร์ฟเวอร์ได้');
+      // On network failure, enqueue for retry and inform user
+      enqueueOffline(id);
+      showError('ไม่สามารถติดต่อเซิร์ฟเวอร์ได้ — ข้อมูลจะถูกเก็บไว้และลองใหม่อัตโนมัติ');
     }
   }
+
+  // Offline queueing (localStorage-backed)
+  const OFFLINE_KEY = 'kiosk_offline_queue_v1';
+
+  function loadQueue(){
+    try{
+      const raw = localStorage.getItem(OFFLINE_KEY);
+      if (!raw) return [];
+      return JSON.parse(raw);
+    }catch(e){ return []; }
+  }
+
+  function saveQueue(q){
+    try{ localStorage.setItem(OFFLINE_KEY, JSON.stringify(q)); }catch(e){ console.warn('saveQueue failed', e); }
+  }
+
+  function enqueueOffline(id){
+    const q = loadQueue();
+    q.push({id: String(id), ts: Date.now()});
+    saveQueue(q);
+    console.info('Enqueued offline id', id);
+  }
+
+  async function processOfflineQueue(){
+    const q = loadQueue();
+    if (!q.length) return;
+    // If navigator reports offline, skip
+    if (typeof navigator !== 'undefined' && !navigator.onLine) return;
+    const base = getBackendBase();
+    const newQ = [];
+    for (const item of q){
+      try{
+        const url = `${base.replace(/\/$/, '')}/rxqueue/${encodeURIComponent(item.id)}`;
+        const r = await fetch(url);
+        if (!r.ok) throw new Error('Network response not ok: ' + r.status);
+        const data = await r.json();
+        if (Array.isArray(data) && data.length>0){
+          console.info('Offline item processed', item.id);
+          // Optionally show result briefly
+          showResult(data[0]);
+          await new Promise(res=>setTimeout(res,1000));
+          continue; // do not requeue
+        } else {
+          // keep in queue (no record)
+          newQ.push(item);
+        }
+      }catch(e){
+        console.warn('Retry failed for', item.id, e);
+        newQ.push(item);
+      }
+    }
+    saveQueue(newQ);
+  }
+
+  // Periodically attempt to flush offline queue
+  setInterval(processOfflineQueue, 10000);
 
   // Handle HID scanner: scanners usually send characters then Enter
   window.addEventListener('keydown', (ev) => {
