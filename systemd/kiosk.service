@@ -6,7 +6,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=pi
+User=moremeng
 WorkingDirectory=/opt/kiosk-checkpoint
 ExecStart=/usr/bin/node /opt/kiosk-checkpoint/server/index.js
 Restart=always

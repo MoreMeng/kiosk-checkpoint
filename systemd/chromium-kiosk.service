@@ -6,13 +6,13 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=pi
+User=moremeng
 Environment="DISPLAY=:0"
-Environment="XAUTHORITY=/home/pi/.Xauthority"
-WorkingDirectory=/home/pi
+Environment="XAUTHORITY=/home/moremeng/.Xauthority"
+WorkingDirectory=/home/moremeng
 
 # Start Chromium in kiosk mode
-ExecStart=/usr/bin/chromium-browser \
+ExecStart=/usr/bin/chromium \
     --noerrdialogs \
     --kiosk \
     --incognito \

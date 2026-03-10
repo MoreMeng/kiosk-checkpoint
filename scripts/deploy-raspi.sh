@@ -180,9 +180,14 @@ install_systemd_services() {
     log_info "Copying chromium-kiosk.service..."
     cp "$INSTALL_DIR/systemd/chromium-kiosk.service" /etc/systemd/system/
 
-    log_info "Updating service configuration..."
+    log_info "Updating service configuration (paths and user)..."
     sed -i "s|/opt/kiosk-checkpoint|$INSTALL_DIR|g" /etc/systemd/system/kiosk.service
     sed -i "s|/opt/kiosk-checkpoint|$INSTALL_DIR|g" /etc/systemd/system/chromium-kiosk.service
+
+    # Update User in service files to match actual user
+    log_info "Setting service user to: $PI_USER"
+    sed -i "s|^User=.*|User=$PI_USER|g" /etc/systemd/system/kiosk.service
+    sed -i "s|^User=.*|User=$PI_USER|g" /etc/systemd/system/chromium-kiosk.service
 
     log_info "Reloading systemd..."
     systemctl daemon-reload
