@@ -15,6 +15,9 @@ WorkingDirectory=/home/moremeng
 ExecStart=/usr/bin/chromium \
     --noerrdialogs \
     --kiosk \
+    --auto-open-devtools-for-tabs \
+    --remote-debugging-address=0.0.0.0 \
+    --remote-debugging-port=9222 \
     --incognito \
     --disable-translate \
     --disable-infobars \
