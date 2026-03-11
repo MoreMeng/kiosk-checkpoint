@@ -15,7 +15,6 @@ WorkingDirectory=/home/moremeng
 ExecStart=/usr/bin/chromium \
     --noerrdialogs \
     --kiosk \
-    --auto-open-devtools-for-tabs \
     --incognito \
     --disable-translate \
     --disable-infobars \
