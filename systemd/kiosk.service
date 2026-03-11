@@ -8,7 +8,7 @@ Wants=network-online.target
 Type=simple
 User=moremeng
 WorkingDirectory=/opt/kiosk-checkpoint
-ExecStart=/usr/bin/node /opt/kiosk-checkpoint/server/index.js
+ExecStart=/bin/bash -c 'exec node /opt/kiosk-checkpoint/server/index.js'
 Restart=always
 RestartSec=10
 StandardOutput=journal
@@ -17,10 +17,6 @@ SyslogIdentifier=kiosk
 
 # Security/Resource limits
 NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ProtectHome=true
-ReadWritePaths=/opt/kiosk-checkpoint/logs
 
 # Resource limits (Raspberry Pi optimization)
 MemoryLimit=256M
