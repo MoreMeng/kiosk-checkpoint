@@ -1,6 +1,6 @@
 [Unit]
 Description=Chromium Kiosk - Queue Display
-Documentation=https://github.com/yourusername/kiosk-checkpoint
+Documentation=https://github.com/moremeng/kiosk-checkpoint
 After=network-online.target graphical.target kiosk.service
 Wants=network-online.target
 
@@ -15,8 +15,11 @@ WorkingDirectory=/home/moremeng
 ExecStart=/usr/bin/chromium \
     --noerrdialogs \
     --kiosk \
-    --incognito \
+    --user-data-dir=/home/moremeng/.config/chromium \
     --disable-translate \
+    --translate-security-origin-list="" \
+    --translate-language-list="" \
+    --no-translate \
     --disable-infobars \
     --disable-session-crashed-bubble \
     --disable-component-extensions-with-background-pages \
