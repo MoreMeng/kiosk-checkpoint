@@ -103,6 +103,9 @@ cd /opt/kiosk-checkpoint
 # Install Node dependencies (ในกรณีนี้ไม่มี npm packages)
 npm install
 
+# Create logs directory (required for systemd service)
+mkdir -p /opt/kiosk-checkpoint/logs
+
 # Set permissions
 sudo chown -R pi:pi /opt/kiosk-checkpoint
 chmod +x server/index.js
@@ -245,7 +248,36 @@ Access-Control-Allow-Headers: Accept, Content-Type
 
 ---
 
-## 🛑 Troubleshooting
+## � Debug Mode (บน Raspberry Pi)
+
+ถ้าต้องการดู DevTools console บนจอเครื่อง Chromium เพื่อ debug:
+
+### เปิด DevTools แบบ Auto-Open
+
+DevTools จะเปิดอัตโนมัติด้านข้างของหน้า kiosk:
+
+```bash
+# ตรวจสอบว่า chromium-kiosk.service มี flag:
+#   --auto-open-devtools-for-tabs
+
+sudo systemctl status chromium-kiosk
+sudo journalctl -u chromium-kiosk -f
+```
+
+### ปิด Debug Mode เมื่อเสร็จ
+
+เมื่อไม่ต้องการ DevTools แล้ว ให้ลบ `--auto-open-devtools-for-tabs` ออกจาก:
+
+```bash
+sudo nano /etc/systemd/system/chromium-kiosk.service
+# ลบบรรทัด: --auto-open-devtools-for-tabs
+sudo systemctl daemon-reload
+sudo systemctl restart chromium-kiosk
+```
+
+---
+
+## �🛑 Troubleshooting
 
 ### 1. Chromium ไม่ start
 
@@ -261,17 +293,49 @@ export DISPLAY=:0
 /usr/bin/chromium-browser --kiosk http://localhost:8080
 ```
 
-### 2. Node server ไม่ตอบ
+### 2. Node server ไม่ตอบ / systemd service ล้มเหลว
+
+**Error: "Failed to set up mount namespacing" หรือ "Failed at step NAMESPACE"**
 
 ```bash
-# Check service
+# Check service status
 sudo systemctl status kiosk
 
-# Test manually
-node /opt/kiosk-checkpoint/server/index.js
+# View detailed logs
+sudo journalctl -u kiosk -n 20
+```
 
+**แก้ไข:**
+
+```bash
+# 1. สร้าง logs directory ที่ service ต้องการ
+mkdir -p /opt/kiosk-checkpoint/logs
+
+# 2. ตรวจสอบว่า kiosk.service ไม่มี ProtectSystem=strict หรือ PrivateTmp=true
+# (security restrictions ที่ทำให้ mount fail บน Raspberry Pi)
+# ไฟล์ควรมีแค่ NoNewPrivileges=true
+
+# 3. Reload systemd และ restart
+sudo systemctl daemon-reload
+sudo systemctl restart kiosk
+
+# 4. Test manually ถ้ายังไม่ได้
+sudo systemctl stop kiosk
+cd /opt/kiosk-checkpoint
+node server/index.js
+```
+
+**ถ้ายังไม่ได้:**
+
+```bash
 # Test network
 curl http://localhost:8080
+
+# Check if port 8080 is in use
+sudo lsof -i :8080
+
+# Kill process if needed
+sudo fuser -k 8080/tcp
 ```
 
 ### 3. API ยังไม่ตอบ / CORS error
