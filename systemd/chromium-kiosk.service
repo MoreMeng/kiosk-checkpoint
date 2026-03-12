@@ -11,15 +11,14 @@ Environment="DISPLAY=:0"
 Environment="XAUTHORITY=/home/moremeng/.Xauthority"
 WorkingDirectory=/home/moremeng
 
-# Start Chromium in kiosk mode
+# Start Chromium in kiosk mode with strict translation disable
 ExecStart=/usr/bin/chromium \
     --noerrdialogs \
     --kiosk \
-    --user-data-dir=/home/moremeng/.config/chromium \
+    --incognito \
     --disable-translate \
-    --translate-security-origin-list="" \
-    --translate-language-list="" \
-    --no-translate \
+    --disable-features=Translate \
+    --lang=en-US \
     --disable-infobars \
     --disable-session-crashed-bubble \
     --disable-component-extensions-with-background-pages \
