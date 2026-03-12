@@ -11,6 +11,9 @@ Environment="DISPLAY=:0"
 Environment="XAUTHORITY=/home/moremeng/.Xauthority"
 WorkingDirectory=/home/moremeng
 
+# Hide mouse cursor
+ExecStartPre=/usr/bin/unclutter -display :0 -idle 0 -root
+
 # Start Chromium in kiosk mode with strict translation disable
 ExecStart=/usr/bin/chromium \
     --noerrdialogs \
