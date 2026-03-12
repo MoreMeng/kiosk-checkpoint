@@ -101,7 +101,7 @@ class KioskApp {
             source: data.source || '-',
             qid: data.qid || data.qno || '-',
             status: data.qstn || '-',
-            cdate: data.cdate || '-',
+            cdate: data.cdate || 'รอเรียกคิว',
             location: data.location || '-'
         };
 
