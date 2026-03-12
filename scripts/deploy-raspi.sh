@@ -89,11 +89,12 @@ install_dependencies() {
         exit 1
     fi
 
-    log_info "Installing packages: nodejs, npm, git, curl..."
+    log_info "Installing packages: nodejs, npm, git, curl, unclutter-xfixes..."
     if ! apt-get install -y \
         nodejs npm \
         git \
-        curl; then
+        curl \
+        unclutter-xfixes; then
         log_error "Failed to install core dependencies"
         echo "Try: sudo apt-get update && sudo apt-get upgrade"
         exit 1
@@ -121,6 +122,38 @@ install_dependencies() {
     log_info "Dependencies installed successfully"
 }
 
+select_deployment_mode() {
+    echo ""
+    echo "╔════════════════════════════════════════════════════════╗"
+    echo "║          Select Deployment Mode                        ║"
+    echo "╚════════════════════════════════════════════════════════╝"
+    echo ""
+    echo "1) Full Install   - ติดตั้งใหม่ทั้งหมด (dependencies + code + services)"
+    echo "2) Quick Update   - อัพเดทเฉพาะ code (HTML, CSS, JS)"
+    echo "3) Full Update    - อัพเดท code + service files (reload systemd)"
+    echo ""
+    read -p "Select mode (1-3): " mode_choice
+
+    case $mode_choice in
+        1)
+            DEPLOY_MODE="full"
+            log_info "Mode: Full Installation"
+            ;;
+        2)
+            DEPLOY_MODE="quick-update"
+            log_info "Mode: Quick Code Update Only"
+            ;;
+        3)
+            DEPLOY_MODE="full-update"
+            log_info "Mode: Full Update (Code + Services)"
+            ;;
+        *)
+            log_error "Invalid option"
+            exit 1
+            ;;
+    esac
+}
+
 clone_or_update_project() {
     log_step "Setting up project files..."
 
@@ -135,14 +168,38 @@ clone_or_update_project() {
     fi
 
     if [ -d "$INSTALL_DIR" ]; then
-        log_info "Installation directory already exists at $INSTALL_DIR"
-        read -p "Overwrite? (y/n) " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            rm -rf "$INSTALL_DIR"
-        else
-            log_warn "Skipping copy, using existing installation"
+        if [ "$DEPLOY_MODE" = "quick-update" ] || [ "$DEPLOY_MODE" = "full-update" ]; then
+            if [ "$DEPLOY_MODE" = "quick-update" ]; then
+                log_info "Quick Update Mode: Updating code files only..."
+            else
+                log_info "Full Update Mode: Updating code and service files..."
+            fi
+            log_info "Syncing files from $PROJECT_DIR to $INSTALL_DIR..."
+            # Copy only important files, skip node_modules and .git
+            rsync -av --exclude='node_modules' --exclude='.git' --exclude='.gitignore' \
+                "$PROJECT_DIR/public/" "$INSTALL_DIR/public/" || log_warn "rsync not available, trying cp instead"
+            if [ $? -ne 0 ]; then
+                cp -r "$PROJECT_DIR/public/"* "$INSTALL_DIR/public/" 2>/dev/null || true
+                cp -r "$PROJECT_DIR/_styles/"* "$INSTALL_DIR/_styles/" 2>/dev/null || true
+                cp -r "$PROJECT_DIR/server/"*.js "$INSTALL_DIR/server/" 2>/dev/null || true
+            fi
+            chown -R "$PI_USER:$PI_USER" "$INSTALL_DIR"
+            log_info "Code files updated successfully"
+
+            if [ "$DEPLOY_MODE" = "full-update" ]; then
+                update_systemd_services
+            fi
             return
+        else
+            log_info "Installation directory already exists at $INSTALL_DIR"
+            read -p "Full Install: Remove existing directory and reinstall? (y/n) " -n 1 -r
+            echo
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                rm -rf "$INSTALL_DIR"
+            else
+                log_warn "Skipping installation, using existing installation"
+                return
+            fi
         fi
     fi
 
@@ -193,6 +250,41 @@ install_systemd_services() {
     systemctl daemon-reload
 
     log_info "Systemd services installed successfully"
+}
+
+update_systemd_services() {
+    log_step "Updating systemd service files..."
+
+    if [ ! -f "$INSTALL_DIR/systemd/kiosk.service" ]; then
+        log_error "Service file not found: $INSTALL_DIR/systemd/kiosk.service"
+        return 1
+    fi
+
+    if [ ! -f "$INSTALL_DIR/systemd/chromium-kiosk.service" ]; then
+        log_error "Service file not found: $INSTALL_DIR/systemd/chromium-kiosk.service"
+        return 1
+    fi
+
+    log_info "Updating kiosk.service..."
+    cp "$INSTALL_DIR/systemd/kiosk.service" /etc/systemd/system/
+
+    log_info "Updating chromium-kiosk.service..."
+    cp "$INSTALL_DIR/systemd/chromium-kiosk.service" /etc/systemd/system/
+
+    log_info "Updating service configuration (paths and user)..."
+    sed -i "s|/opt/kiosk-checkpoint|$INSTALL_DIR|g" /etc/systemd/system/kiosk.service
+    sed -i "s|/opt/kiosk-checkpoint|$INSTALL_DIR|g" /etc/systemd/system/chromium-kiosk.service
+
+    # Update User in service files to match actual user
+    log_info "Setting service user to: $PI_USER"
+    sed -i "s|^User=.*|User=$PI_USER|g" /etc/systemd/system/kiosk.service
+    sed -i "s|^User=.*|User=$PI_USER|g" /etc/systemd/system/chromium-kiosk.service
+
+    log_info "Reloading systemd..."
+    systemctl daemon-reload
+
+    log_info "Systemd service files updated successfully"
+    return 0
 }
 
 configure_api_endpoint() {
@@ -335,18 +427,33 @@ show_troubleshooting() {
 
 check_root
 check_running_on_pi
+select_deployment_mode
 
 echo ""
 echo "╔════════════════════════════════════════════════════════╗"
 echo "║        Kiosk Checkpoint - Deployment Plan              ║"
 echo "╚════════════════════════════════════════════════════════╝"
 echo ""
-echo "This script will perform the following steps:"
-echo "  1. Install system dependencies (Node.js, Chromium, etc)"
-echo "  2. Copy project files to $INSTALL_DIR"
-echo "  3. Configure systemd services for autostart"
-echo "  4. Configure API endpoint"
-echo "  5. Enable and optionally start services"
+
+if [ "$DEPLOY_MODE" = "full" ]; then
+    echo "This script will perform the following steps:"
+    echo "  1. Install system dependencies (Node.js, Chromium, etc)"
+    echo "  2. Copy project files to $INSTALL_DIR"
+    echo "  3. Configure systemd services for autostart"
+    echo "  4. Configure API endpoint"
+    echo "  5. Enable and optionally start services"
+elif [ "$DEPLOY_MODE" = "quick-update" ]; then
+    echo "This script will:"
+    echo "  1. Update code files (HTML, CSS, JS) only"
+    echo "  2. Keep existing services and dependencies"
+    echo "  3. Restart services to apply changes"
+else
+    echo "This script will:"
+    echo "  1. Update code files (HTML, CSS, JS)"
+    echo "  2. Update systemd service files"
+    echo "  3. Reload systemd and restart services"
+fi
+
 echo ""
 echo "Project Directory: $PROJECT_DIR"
 echo "Install Directory: $INSTALL_DIR"
@@ -362,22 +469,44 @@ fi
 
 echo ""
 
-# Run installation steps
-check_running_on_pi
-install_dependencies
-clone_or_update_project
-install_systemd_services
-configure_api_endpoint
-test_api_connection
-configure_display
-enable_services
+if [ "$DEPLOY_MODE" = "full" ]; then
+    # Full installation
+    check_running_on_pi
+    install_dependencies
+    clone_or_update_project
+    install_systemd_services
+    configure_api_endpoint
+    test_api_connection
+    configure_display
+    enable_services
+elif [ "$DEPLOY_MODE" = "quick-update" ]; then
+    # Quick update only - code files
+    clone_or_update_project
+    if systemctl is-enabled kiosk &>/dev/null; then
+        log_step "Restarting services to apply changes..."
+        systemctl restart kiosk
+        systemctl restart chromium-kiosk
+        log_info "Services restarted"
+    fi
+else
+    # Full update - code + service files
+    clone_or_update_project
+    if systemctl is-enabled kiosk &>/dev/null; then
+        log_step "Restarting services to apply changes..."
+        systemctl restart kiosk
+        systemctl restart chromium-kiosk
+        log_info "Services restarted"
+    fi
+fi
 
-# Optional: start immediately
-echo ""
-read -p "Start services now? (y/n) " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    start_services || log_warn "Some services failed to start"
+# Optional: start immediately (only for full install mode)
+if [ "$DEPLOY_MODE" = "full" ]; then
+    echo ""
+    read -p "Start services now? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        start_services || log_warn "Some services failed to start"
+    fi
 fi
 
 show_status
