@@ -16,9 +16,12 @@
     <div id="idleScreen" class="screen active">
         <div class="container">
             <h1>ตรวจสอบสถานะคิว</h1>
-            <div class="idle-icon material-icons">document_scanner</div>
+            <div class="idle-icon-wrapper">
+                <div class="idle-icon material-icons">qr_code_2</div>
+                <div class="scanner-lens material-icons">search</div>
+            </div>
             <h2>ใช้สำหรับใบนำทางและคิวยา</h2>
-            <p class="instruction">สแกนบาร์โค้ดบนใบนำทาง หรือคิวยาของท่าน</p>
+            <p class="instruction">สแกน QR Code บนใบนำทาง หรือคิวยาของท่าน</p>
             <div id="scannerStatus" class="status-badge" style="margin-top: 30px;">
                 <span class="material-icons icon-small">check_circle</span> สแกนเนอร์: พร้อม
             </div>
@@ -88,7 +91,7 @@
 
     <!-- Footer -->
     <footer class="app-footer">
-        <span class="version">Version: 0.0.4 beta</span>
+        <span class="version">Version: 0.0.5 beta</span>
         <span class="developer">Developed by MoreMeng</span>
     </footer>
 
