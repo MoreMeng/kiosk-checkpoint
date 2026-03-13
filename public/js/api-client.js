@@ -14,8 +14,6 @@ class QueueAPIClient {
         // ตรวจสอบ network status
         window.addEventListener('online', () => this.handleOnline());
         window.addEventListener('offline', () => this.handleOffline());
-
-        console.log('[API] QueueAPIClient initialized');
     }
 
     /**
@@ -30,7 +28,6 @@ class QueueAPIClient {
 
         // ✅ ใช้ proxy server เพื่อ bypass CORS (แทน direct API call)
         const url = `/api/rxqueue/${patientId}`;
-        console.log('[API] Fetching:', url);
 
         let lastError = null;
 
@@ -56,13 +53,11 @@ class QueueAPIClient {
                 }
 
                 // สำเร็จ - เอาข้อมูลแรก
-                console.log('[API] Success:', data[0]);
                 this.saveToCache(patientId, data[0]);
                 return data[0];
 
             } catch (error) {
                 lastError = error;
-                console.warn(`[API] Attempt ${attempt}/${this.retryAttempts} failed:`, error.message);
 
                 if (attempt < this.retryAttempts) {
                     // รอก่อน retry
@@ -74,7 +69,6 @@ class QueueAPIClient {
         // ถ้า retry หมดแล้วให้ลองจาก cache
         const cached = this.getFromCache(patientId);
         if (cached) {
-            console.log('[API] Using cached data');
             return cached;
         }
 
@@ -97,7 +91,6 @@ class QueueAPIClient {
         if (!queue.some(q => q.patientId === patientId)) {
             queue.push(entry);
             this.saveOfflineQueue(queue);
-            console.log('[Offline] Enqueued:', patientId);
         }
     }
 
@@ -108,17 +101,13 @@ class QueueAPIClient {
         const queue = this.getOfflineQueue();
 
         if (queue.length === 0) {
-            console.log('[Offline] No offline requests to process');
             return;
         }
-
-        console.log('[Offline] Processing', queue.length, 'offline requests');
 
         for (const entry of queue) {
             try {
                 await this.getQueueStatus(entry.patientId);
                 this.removeFromOfflineQueue(entry.patientId);
-                console.log('[Offline] Processed:', entry.patientId);
             } catch (error) {
                 console.warn('[Offline] Failed to process:', entry.patientId, error.message);
                 // เก็บไว้เพื่อ retry ครั้งหน้า
@@ -134,7 +123,6 @@ class QueueAPIClient {
             timestamp: Date.now()
         };
         localStorage.setItem(`queue_${patientId}`, JSON.stringify(cache));
-        console.log('[Cache] Saved:', patientId);
     }
 
     getFromCache(patientId) {
@@ -146,12 +134,10 @@ class QueueAPIClient {
             const age = Date.now() - timestamp;
 
             if (age > this.cacheExpiry) {
-                console.log('[Cache] Expired:', patientId);
                 localStorage.removeItem(`queue_${patientId}`);
                 return null;
             }
 
-            console.log('[Cache] Hit (age:', age + 'ms)');
             return data;
         } catch (e) {
             console.error('[Cache] Parse error:', e);
@@ -172,19 +158,16 @@ class QueueAPIClient {
         const queue = this.getOfflineQueue();
         const filtered = queue.filter(q => q.patientId !== patientId);
         this.saveOfflineQueue(filtered);
-        console.log('[Offline] Removed:', patientId);
     }
 
     // === Network Status Handlers ===
 
     handleOnline() {
-        console.log('[Network] Online detected');
         document.getElementById('offlineIndicator')?.classList.add('hidden');
         this.processOfflineQueue();
     }
 
     handleOffline() {
-        console.log('[Network] Offline detected');
         const indicator = document.getElementById('offlineIndicator');
         if (indicator) {
             indicator.classList.remove('hidden');
