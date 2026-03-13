@@ -12,8 +12,6 @@ class BarcodeScanner {
 
         // ใช้ keydown event เพื่อให้ได้ทุก keypress
         document.addEventListener('keydown', (e) => this.handleKeydown(e));
-
-        console.log('[Scanner] Barcode scanner initialized');
     }
 
     handleKeydown(event) {
@@ -35,7 +33,6 @@ class BarcodeScanner {
             // Timeout: ถ้าไม่มีอักขระเข้ามา 100ms ให้ reset
             this.timeoutId = setTimeout(() => {
                 if (this.inputBuffer && this.inputBuffer.length > 0) {
-                    console.log('[Scanner] Timeout - auto-submit:', this.inputBuffer);
                     this.submitScan();
                 }
             }, this.readTimeout);
@@ -46,7 +43,6 @@ class BarcodeScanner {
         const barcode = this.inputBuffer.trim();
 
         if (barcode.length === 0) {
-            console.log('[Scanner] Empty barcode, ignoring');
             return;
         }
 
@@ -56,8 +52,6 @@ class BarcodeScanner {
         }
         this.inputBuffer = '';
 
-        console.log('[Scanner] Scan detected:', barcode);
-
         // Callback
         if (typeof this.callback === 'function') {
             this.callback(barcode);
@@ -66,7 +60,6 @@ class BarcodeScanner {
 
     // Test method (สำหรับการทดสอบเมื่อไม่มี physical scanner)
     simulateScan(barcode) {
-        console.log('[Scanner] Simulating scan:', barcode);
         this.inputBuffer = barcode;
         this.submitScan();
     }

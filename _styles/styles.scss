@@ -202,6 +202,8 @@ body {
 #loadingMessage {
     font-size: $font-lg;
     color: lighten($text-gray, 10);
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 /* Error Screen */
@@ -214,14 +216,19 @@ body {
 }
 
 #errorMessage {
-    font-size: $font-md;
+    font-size: $font-lg;
     color: $text-dark;
     margin: $spacing-lg 0;
-    padding: $spacing-lg;
+    padding: $spacing-xl $spacing-xl;
     background: lighten($accent-yellow, 40);
     border-left: 4px solid $accent-yellow;
     border-radius: $radius-sm;
-    text-align: left;
+    text-align: center;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: 'Noto Sans Thai', 'Segoe UI', sans-serif;
+    line-height: 1.8;
+    font-weight: 500;
 }
 
 .btn-retry {
