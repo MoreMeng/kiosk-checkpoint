@@ -99,10 +99,16 @@ class KioskApp {
      * Display queue data on result screen
      */
     displayQueueData(data) {
+        const isPharmacyQueue = (data.source || '').trim() === 'คิวห้องยา';
+        const baseStatus = data.qstn || '-';
+        const statusWithDispenseChannel = (data.qno && data.qno !== '-')
+            ? `${baseStatus} (ช่องจ่ายยา ${data.qno})`
+            : baseStatus;
+
         const mapping = {
             source: data.source || '-',
             qid: data.qid || data.qno || '-',
-            status: data.qstn || '-',
+            status: isPharmacyQueue ? statusWithDispenseChannel : baseStatus,
             cdate: data.cdate || 'รอเรียกคิว',
             location: data.location || '-'
         };
