@@ -8,6 +8,9 @@ class KioskApp {
         this.scanner = null;
         this.autoReturnTimeout = null;
         this.countdownInterval = null;
+        this.slideshowInterval = null;
+        this.slideshowIndex = 0;
+        this.slideshowSlides = null;
 
         // Screens
         this.screens = {
@@ -31,6 +34,9 @@ class KioskApp {
 
         // Show idle screen
         this.showScreen('idle');
+
+        // Detect and start image slideshow
+        this.initSlideshow();
     }
 
     /**
@@ -141,6 +147,81 @@ class KioskApp {
         if (screen) {
             screen.classList.add('active');
         }
+
+        if (screenName === 'idle') {
+            this.startSlideshow();
+        } else {
+            this.stopSlideshow();
+        }
+    }
+
+    /**
+     * Auto-detect images/1-5.(png|jpg|jpeg|webp) and build slideshow
+     */
+    async initSlideshow() {
+        const extensions = ['png', 'jpg', 'jpeg', 'webp'];
+        const found = [];
+
+        for (let i = 1; i <= 5; i++) {
+            for (const ext of extensions) {
+                const path = `images/${i}.${ext}`;
+                const exists = await new Promise(resolve => {
+                    const img = new Image();
+                    img.onload = () => resolve(true);
+                    img.onerror = () => resolve(false);
+                    img.src = path;
+                });
+                if (exists) {
+                    found.push(path);
+                    break;
+                }
+            }
+        }
+
+        const container = document.getElementById('idleSlideshow');
+        if (!container || found.length === 0) return;
+
+        container.innerHTML = '';
+        found.forEach((src, index) => {
+            const slide = document.createElement('div');
+            slide.className = 'idle-slide' + (index === 0 ? ' active' : '');
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = '';
+            img.draggable = false;
+            slide.appendChild(img);
+            container.appendChild(slide);
+        });
+
+        this.slideshowSlides = container.querySelectorAll('.idle-slide');
+        this.slideshowIndex = 0;
+
+        // Auto-start if idle screen is currently active
+        if (this.screens.idle && this.screens.idle.classList.contains('active')) {
+            this.startSlideshow();
+        }
+    }
+
+    startSlideshow() {
+        this.stopSlideshow();
+        if (!this.slideshowSlides || this.slideshowSlides.length <= 1) return;
+        this.slideshowInterval = setInterval(() => {
+            this._nextSlideshowSlide();
+        }, 30000);
+    }
+
+    stopSlideshow() {
+        if (this.slideshowInterval) {
+            clearInterval(this.slideshowInterval);
+            this.slideshowInterval = null;
+        }
+    }
+
+    _nextSlideshowSlide() {
+        if (!this.slideshowSlides || this.slideshowSlides.length === 0) return;
+        this.slideshowSlides[this.slideshowIndex].classList.remove('active');
+        this.slideshowIndex = (this.slideshowIndex + 1) % this.slideshowSlides.length;
+        this.slideshowSlides[this.slideshowIndex].classList.add('active');
     }
 
     /**
