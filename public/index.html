@@ -10,22 +10,24 @@
     <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.min.css">
+    <style>
+        .scanner-status-footer {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: .88rem;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 4px 12px;
+            border-radius: 12px;
+            white-space: nowrap;
+        }
+    </style>
 </head>
 <body>
-    <!-- Idle Screen (รอการสแกน) -->
+    <!-- Idle Screen (Slideshow) -->
     <div id="idleScreen" class="screen active">
-        <div class="container">
-            <h1>ตรวจสอบสถานะคิว</h1>
-            <div class="idle-icon-wrapper">
-                <div class="idle-icon material-icons">qr_code_2</div>
-                <div class="scanner-lens material-icons">search</div>
-            </div>
-            <h2>ใช้สำหรับใบนำทางและคิวยา</h2>
-            <p class="instruction">สแกน QR Code บนบัตรคิวของท่าน</p>
-            <div id="scannerStatus" class="status-badge" style="margin-top: 30px;">
-                <span class="material-icons icon-small">check_circle</span> สแกนเนอร์: พร้อม
-            </div>
-        </div>
+        <div id="idleSlideshow" class="idle-slideshow"></div>
     </div>
 
     <!-- Loading Screen -->
@@ -91,7 +93,10 @@
 
     <!-- Footer -->
     <footer class="app-footer">
-        <span class="version">Version: 0.0.6 beta</span>
+        <span class="version">Version: 0.0.7 beta</span>
+        <div id="scannerStatus" class="scanner-status-footer">
+            <span class="material-icons icon-small">check_circle</span> สแกนเนอร์: พร้อม
+        </div>
         <span class="developer">Developed by MoreMeng</span>
     </footer>
 

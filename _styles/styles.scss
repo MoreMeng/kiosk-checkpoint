@@ -84,7 +84,45 @@ body {
     width: 100%;
 }
 
-/* Idle Screen */
+/* Idle Screen - Slideshow */
+#idleScreen {
+    padding: 0;
+    overflow: hidden;
+}
+
+.idle-slideshow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.idle-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+    }
+
+    &.active {
+        opacity: 1;
+    }
+}
+
+.idle-scanner-status {
+    // moved to footer — see .scanner-status-footer
+}
+
 @keyframes bounce {
     0%, 100% {
         transform: translateY(0);
@@ -106,58 +144,6 @@ body {
         transform: rotate(360deg) translateX(50px) rotate(-360deg);
         opacity: 1;
     }
-}
-
-#idleScreen {
-    h1 {
-        font-size: $font-4xl-lg;
-        color: $primary-dark;
-        margin-bottom: $spacing-lg;
-    }
-
-    h2 {
-        font-size: $font-3xl;
-        color: $primary-dark;
-        margin: $spacing-lg 0;
-    }
-
-    p {
-        font-size: $font-xl;
-        color: $text-dark;
-    }
-}
-
-.idle-icon-wrapper {
-    position: relative;
-    width: 120px;
-    height: 120px;
-    margin: $spacing-xl auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.idle-icon.material-icons {
-    font-size: 88px;
-    color: #000000;
-    margin: 0;
-    animation: none;
-}
-
-.scanner-lens.material-icons {
-    position: absolute;
-    font-size: 88px;
-    color: $accent-yellow;
-    animation: scanAround 3s infinite ease-in-out;
-}
-
-.instruction {
-    margin-top: $spacing-lg;
-    padding: $spacing-lg;
-    background: lighten($primary-bright, 45);
-    border-left: 4px solid $primary-dark;
-    font-size: $font-lg;
-    border-radius: $radius-sm;
 }
 
 .status-badge {
@@ -371,16 +357,6 @@ body {
 
 /* Responsive */
 @media (max-width: 1024px) {
-    #idleScreen {
-        h1 {
-            font-size: 2.75rem;
-        }
-
-        h2 {
-            font-size: 2.2rem;
-        }
-    }
-
     .big-number {
         font-size: 3.3rem;
     }
@@ -390,24 +366,6 @@ body {
     .container {
         padding: $spacing-lg;
         max-width: 90vw;
-    }
-
-    #idleScreen {
-        h1 {
-            font-size: 2.2rem;
-        }
-
-        h2 {
-            font-size: 1.65rem;
-        }
-
-        p {
-            font-size: 1.21rem;
-        }
-    }
-
-    .idle-icon.material-icons {
-        font-size: 66px;
     }
 
     .big-number {
@@ -465,26 +423,42 @@ body {
     bottom: 0;
     left: 0;
     width: 100%;
-    background: linear-gradient(90deg, $primary-dark 0%, $primary-bright 100%);
+    background: transparent;
     color: white;
-    padding: $spacing-sm $spacing-lg;
+    padding: $spacing-xs $spacing-lg;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.935rem;
+    font-size: 0.88rem;
     z-index: 999;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: none;
 }
 
 .app-footer .version {
     font-weight: 600;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.5);
     padding: 4px 12px;
     border-radius: 12px;
     letter-spacing: 0.5px;
+    white-space: nowrap;
 }
 
 .app-footer .developer {
-    opacity: 0.9;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 4px 12px;
+    border-radius: 12px;
     font-size: 0.88rem;
+    white-space: nowrap;
+}
+
+.scanner-status-footer {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.88rem;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 4px 12px;
+    border-radius: 12px;
+    white-space: nowrap;
 }
