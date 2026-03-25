@@ -7,6 +7,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+const scanLogger = require('./logger');
 
 const PORT = 8080;
 const PUBLIC_DIR = path.join(__dirname, '../public');
@@ -55,6 +56,87 @@ const server = http.createServer((req, res) => {
             res.writeHead(503, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'API unavailable' }));
         });
+        return;
+    }
+
+    // ✅ Logging API - บันทึกข้อมูลการสแกน
+    if (pathname === '/api/logs' && req.method === 'POST') {
+        let body = '';
+
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+
+        req.on('end', () => {
+            try {
+                const payload = JSON.parse(body);
+                const scannedData = payload.scannedData || payload.data;
+
+                if (!scannedData) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'scannedData is required' }));
+                    return;
+                }
+
+                const result = scanLogger.logScan(scannedData);
+
+                res.writeHead(200, {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                });
+                res.end(JSON.stringify(result));
+
+            } catch (error) {
+                console.error('[Logging Error]', error.message);
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: error.message }));
+            }
+        });
+        return;
+    }
+
+    // ✅ Retrieve logs - ดึงข้อมูล logs ทั้งหมด
+    if (pathname === '/api/logs' && req.method === 'GET') {
+        const result = scanLogger.readLogs();
+
+        res.writeHead(200, {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        });
+        res.end(JSON.stringify(result));
+        return;
+    }
+
+    // ✅ Download logs CSV - ดาวน์โหลดไฟล์ CSV
+    if (pathname === '/api/logs/download') {
+        const logsFile = scanLogger.getLogsFile();
+
+        fs.readFile(logsFile, (err, content) => {
+            if (err) {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Logs file not found' }));
+                return;
+            }
+
+            res.writeHead(200, {
+                'Content-Type': 'text/csv; charset=utf-8',
+                'Content-Disposition': 'attachment; filename="scan_logs.csv"',
+                'Access-Control-Allow-Origin': '*'
+            });
+            res.end(content);
+        });
+        return;
+    }
+
+    // ✅ Clear logs - ล้าง logs (สำหรับการทดสอบ)
+    if (pathname === '/api/logs/clear' && req.method === 'DELETE') {
+        const result = scanLogger.clearLogs();
+
+        res.writeHead(200, {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        });
+        res.end(JSON.stringify(result));
         return;
     }
 
