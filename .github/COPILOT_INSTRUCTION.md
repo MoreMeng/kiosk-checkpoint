@@ -103,6 +103,10 @@ chromium-browser --noerrdialogs --kiosk --incognito --disable-translate --disabl
 
 **Logging & Monitoring**
 - Local logs (rotate): scanner reads, API results, errors
+- Scan logging: บันทึก QR/Barcode ที่สแกนลง CSV file เพื่อการตรวจสอบและวิเคราะห์
+  - Format: `วันที่,เวลา,ข้อมูลที่สแกน` (Thai locale with DD/MM/YYYY and HH:MM:SS)
+  - Location: `logs/scan_logs.csv` บนเซิร์ฟเวอร์
+  - API endpoints: POST /api/logs (log scan), GET /api/logs, GET /api/logs/download, DELETE /api/logs/clear
 - Optional: ส่ง health ping ไปยัง central server (status up/down)
 
 **Testing & Acceptance Criteria**
@@ -121,6 +125,7 @@ chromium-browser --noerrdialogs --kiosk --incognito --disable-translate --disabl
 - Scanner input handler module (USB HID and serial examples)
 - Network client module calling `rxqueue/:id` พร้อม retry และ timeout handling
 - UI screens: idle, loading, result, error
+- Logging module: บันทึกข้อมูลการสแกนลง CSV file
 - Deployment scripts: `systemd` unit, README deployment steps for Raspberry Pi
 - Tests: basic automated tests (unit for parsing + integration mock for API)
 
@@ -128,17 +133,25 @@ chromium-browser --noerrdialogs --kiosk --incognito --disable-translate --disabl
 1. Build minimal kiosk web app that: reads scanner input, calls API, shows results
 2. Add autostart instructions for Raspberry Pi (systemd + chromium kiosk)
 3. Add offline queueing and retry logic
-4. Add logging and simple health check endpoint
+4. Add scan logging (CSV file) for auditing and analysis
+5. Add logging and simple health check endpoint
 
 **Notes for developer/agent implementation**
 - Assume scanner sends a single line ending with Enter. If not, provide alternate serial reader.
 - Use a small, maintainable stack (e.g., React or plain HTML/JS for UI; lightweight Node.js/Express helper if needed)
 - Keep UI simple and legible for patients (no complex interactions)
+- Logging: เก็บข้อมูลการสแกนลง CSV ที่สามารถใช้วิเคราะห์ได้ โดยบันทึก วันที่ เวลา และข้อมูลที่สแกน
+- CSV module: ใช้ Node.js fs module อ่าน/เขียนไฟล์ – ไม่ต้องใช้ library เพิ่มเติม
 
 **Next steps (what I can implement if you want)**
 - สร้าง scaffold โปรเจกต์ตัวอย่าง (frontend + systemd config)
 - เขียนโมดูลอ่าน barcode HID และตัวอย่างการทดสอบกับ mock API
 - สร้าง README พร้อมคำสั่ง deploy บน Raspberry Pi
+- ✅ **[COMPLETED v1.0.0]** Implementation of scan logging feature (Issue #15)
+  - CSV logger module (`server/logger.js`)
+  - Logging API endpoints
+  - Frontend integration for automatic logging
+  - Documentation in `LOGGING_FEATURE.md`
 
 --
 เขียนโดย: คำสั่งสำหรับ CoPilot agent — ถ้าต้องการให้ผม scaffold โปรเจกต์จริง ๆ ให้ตอบว่า "เริ่ม scaffold" พร้อมบอกว่าจะใช้ web-app (Chromium kiosk) หรือ native app (Electron/Python)

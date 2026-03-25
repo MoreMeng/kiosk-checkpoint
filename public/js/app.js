@@ -52,8 +52,13 @@ class KioskApp {
             this.showError(validationResult.message);
             this.showScreen('error');
             this.scheduleAutoReturn(10);
+            // Log invalid scan
+            this.logScanData(barcode, 'invalid');
             return;
         }
+
+        // Log valid scan
+        this.logScanData(patientId, 'valid');
 
         // Show loading with scanned data
         this.showScreen('loading');
@@ -339,6 +344,30 @@ class KioskApp {
         } catch (e) {
             console.error('[App] Date format error:', e);
             return dateString;
+        }
+    }
+
+    /**
+     * Log scan data to server CSV
+     */
+    async logScanData(scannedData, status = 'valid') {
+        try {
+            const response = await fetch('/api/logs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    scannedData: scannedData,
+                    status: status
+                })
+            });
+
+            const result = await response.json();
+            console.log('[App] Scan logged:', result);
+        } catch (error) {
+            console.error('[App] Error logging scan:', error.message);
+            // Don't block app functionality if logging fails
         }
     }
 

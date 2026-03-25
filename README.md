@@ -11,6 +11,7 @@
 ✅ **Autostart** - systemd service บน Raspberry Pi
 ✅ **Responsive Design** - HDMI monitor, touch-friendly UI
 ✅ **Zero Touch** - ไม่ต้อง mouse/keyboard ในการใช้งานปกติ
+✅ **Scan Logging** - บันทึกข้อมูลการสแกนลง CSV file สำหรับการตรวจสอบ
 
 ---
 
@@ -26,12 +27,17 @@ kiosk-checkpoint/
 │       ├── api-client.js       # API + offline queue
 │       └── scanner.js          # USB HID handler
 ├── server/
-│   └── index.js            # Simple Node HTTP server
+│   ├── index.js            # Simple Node HTTP server
+│   └── logger.js           # CSV logging module
+├── logs/                   # Scan logs directory
+│   └── scan_logs.csv       # CSV file with scan records
 ├── systemd/
 │   ├── kiosk.service       # Node server service
 │   └── chromium-kiosk.service  # Chromium kiosk mode
 ├── package.json
-└── README.md
+├── README.md
+├── LOGGING_FEATURE.md      # Logging feature documentation
+└── COPILOT_INSTRUCTION.md
 ```
 
 ### Data Flow
@@ -227,6 +233,39 @@ Access-Control-Allow-Origin: *
 Access-Control-Allow-Methods: GET, OPTIONS
 Access-Control-Allow-Headers: Accept, Content-Type
 ```
+
+---
+
+---
+
+## 📊 Scan Logging
+
+ระบบจะบันทึกข้อมูลการสแกน QR/Barcode ลง CSV file โดยอัตโนมัติ ซึ่งสามารถนำไปใช้ตรวจสอบหรือวิเคราะห์ได้
+
+### CSV Format
+
+```
+วันที่,เวลา,ข้อมูลที่สแกน
+25/03/2569,14:30:45,"1B205"
+25/03/2569,14:32:10,"CS010"
+```
+
+### Logging APIs
+
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/api/logs` | POST | บันทึกข้อมูลการสแกน (อัตโนมัติ) |
+| `/api/logs` | GET | ดึงข้อมูล logs ทั้งหมด |
+| `/api/logs/download` | GET | ดาวน์โหลด CSV file |
+| `/api/logs/clear` | DELETE | ล้างข้อมูล logs (สำหรับการทดสอบ) |
+
+### File Location
+
+```
+logs/scan_logs.csv
+```
+
+ดูรายละเอียดเพิ่มเติมใน: [LOGGING_FEATURE.md](LOGGING_FEATURE.md)
 
 ---
 
@@ -510,6 +549,6 @@ MIT License - see LICENSE file
 
 ---
 
-**Last Updated**: March 10, 2026
-**Version**: 1.0.0
+**Last Updated**: March 25, 2026
+**Version**: 1.0.0 (hotfix/0.0.9)
 
