@@ -27,8 +27,8 @@ build/
 .env.*.local
 
 # Logs
-logs/
-*.log
+logs/*.log
+logs/*.csv
 journalctl-*.log
 
 # Testing
